@@ -1,5 +1,43 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="Theme.SimpleExpenseTracker" parent="Theme.Material3.DayNight.NoActionBar">
 
-    <style name="Theme.SimpleExpenseTracker" parent="android:Theme.Material.Light.NoActionBar" />
+
+        <item name="colorPrimary">@color/purple_500</item>
+        <item name="colorPrimaryVariant">@color/purple_700</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorSecondary">@color/teal_200</item>
+        <item name="colorSecondaryVariant">@color/teal_700</item>
+        <item name="colorOnSecondary">@color/black</item>
+        <item name="android:statusBarColor">@color/black</item>
+        <item name="android:navigationBarColor">@color/black</item>
+
+    </style>
+
+    <style name="Calculator.Button" parent="Widget.AppCompat.Button.Borderless">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">0dp</item>
+        <item name="android:layout_gravity">fill</item>
+        <item name="android:layout_columnWeight">1</item>
+        <item name="android:layout_rowWeight">1</item>
+        <item name="android:layout_margin">8dp</item>
+        <item name="android:textSize">32sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/white</item>
+    </style>
+
+    <style name="Calculator.Button.Number" parent="Calculator.Button">
+        <item name="android:background">@drawable/background_calculator_button_round</item>
+    </style>
+
+    <style name="Calculator.Button.Operator" parent="Calculator.Button">
+        <item name="android:background">@drawable/background_calculator_button_round</item>
+    </style>
+
+    <style name="Calculator.Button.Top" parent="Calculator.Button">
+        <item name="android:background">@drawable/background_calculator_button_round</item>
+        <item name="android:backgroundTint">#A5A5A5</item>
+        <item name="android:textColor">@color/black</item>
+    </style>
+
 </resources>

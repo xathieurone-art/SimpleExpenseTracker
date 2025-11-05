@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/black"
+    android:fitsSystemWindows="true"
+    tools:context=".ui.theme.ExpenseListFragment">
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/search_bar_layout"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        android:hint="@string/search_expenses_hint"
+        android:minHeight="56dp"
+        android:textColorHint="#AEAEB2"
+        app:boxCornerRadiusBottomEnd="28dp"
+        app:boxCornerRadiusBottomStart="28dp"
+        app:boxCornerRadiusTopEnd="28dp"
+        app:boxCornerRadiusTopStart="28dp"
+        app:boxStrokeColor="@color/nav_item_colors"
+        app:hintTextColor="@color/white"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:startIconDrawable="@drawable/ic_search"
+        app:startIconTint="#FFFFFF">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/etSearch"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:contentDescription="Search for an expense by category or note"
+            android:imeOptions="actionSearch"
+            android:inputType="text"
+            android:minHeight="48dp"
+            android:textColor="@color/white"
+            tools:ignore="EditableContentDescCheck" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <HorizontalScrollView
+        android:id="@+id/chip_scroll_view"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:scrollbars="none"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/search_bar_layout">
+
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/chip_group_category"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingHorizontal="16dp"
+            app:selectionRequired="true"
+            app:singleLine="true"
+            app:singleSelection="true">
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chip_all"
+                style="@style/Widget.MaterialComponents.Chip.Filter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="true"
+                android:minHeight="48dp"
+                android:text="All"
+                android:textColor="@color/chip_text_selector"
+                app:chipBackgroundColor="@color/nav_item_colors" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chip_food"
+                style="@style/Widget.MaterialComponents.Chip.Filter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minHeight="48dp"
+                android:text="Food"
+                android:textColor="@color/chip_text_selector"
+                app:chipBackgroundColor="@color/nav_item_colors" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chip_transport"
+                style="@style/Widget.MaterialComponents.Chip.Filter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minHeight="48dp"
+                android:text="Transport"
+                android:textColor="@color/chip_text_selector"
+                app:chipBackgroundColor="@color/nav_item_colors" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chip_shopping"
+                style="@style/Widget.MaterialComponents.Chip.Filter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minHeight="48dp"
+                android:text="Shopping"
+                android:textColor="@color/chip_text_selector"
+                app:chipBackgroundColor="@color/nav_item_colors" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chip_rent"
+                style="@style/Widget.MaterialComponents.Chip.Filter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minHeight="48dp"
+                android:text="Rent"
+                android:textColor="@color/chip_text_selector"
+                app:chipBackgroundColor="@color/nav_item_colors" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chip_bills"
+                style="@style/Widget.MaterialComponents.Chip.Filter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minHeight="48dp"
+                android:text="Bills"
+                android:textColor="@color/chip_text_selector"
+                app:chipBackgroundColor="@color/nav_item_colors" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chip_entertainment"
+                style="@style/Widget.MaterialComponents.Chip.Filter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minHeight="48dp"
+                android:text="Entertainment"
+                android:textColor="@color/chip_text_selector"
+                app:chipBackgroundColor="@color/nav_item_colors" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chip_health"
+                style="@style/Widget.MaterialComponents.Chip.Filter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minHeight="48dp"
+                android:text="Health"
+                android:textColor="@color/chip_text_selector"
+                app:chipBackgroundColor="@color/nav_item_colors" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chip_other"
+                style="@style/Widget.MaterialComponents.Chip.Filter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minHeight="48dp"
+                android:text="Other"
+                android:textColor="@color/chip_text_selector"
+                app:chipBackgroundColor="@color/nav_item_colors" />
+
+        </com.google.android.material.chip.ChipGroup>
+    </HorizontalScrollView>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerView"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="8dp"
+        android:clipToPadding="false"
+        android:paddingBottom="16dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/chip_scroll_view"
+        tools:listitem="@layout/item_expense" />
+
+    <TextView
+        android:id="@+id/tvNoResults"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="No expenses found."
+        android:textColor="#AEAEB2"
+        android:textSize="16sp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/chip_scroll_view"
+        tools:visibility="visible"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#1C1C1E"
+    android:padding="16dp">
+
+    <TextView
+        android:id="@+id/calculator_display"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:gravity="end"
+        android:maxLines="2"
+        android:padding="20dp"
+        android:text="0"
+        android:textColor="@color/white"
+        android:textSize="56sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@+id/buttons_grid"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_chainStyle="packed" />
+
+    <GridLayout
+        android:id="@+id/buttons_grid"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="16dp"
+        android:columnCount="4"
+        app:layout_constraintBottom_toTopOf="@id/done_button"
+        app:layout_constraintDimensionRatio="1:1.25"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/calculator_display">
+
+        <Button
+            android:id="@+id/btn_clear"
+            style="@style/Calculator.Button.Top"
+            android:text="C"
+            app:backgroundTint="@color/green" />
+        <Button
+            android:id="@+id/btn_paren_open"
+            style="@style/Calculator.Button.Top"
+            android:text="("
+            app:backgroundTint="@color/green" />
+        <Button
+            android:id="@+id/btn_paren_close"
+            style="@style/Calculator.Button.Top"
+            android:text=")"
+            app:backgroundTint="@color/green" />
+        <Button
+            android:id="@+id/btn_divide"
+            style="@style/Calculator.Button.Operator"
+            android:text="÷"
+            app:backgroundTint="@color/green" />
+
+        <Button
+            android:id="@+id/btn_7"
+            style="@style/Calculator.Button.Number"
+            android:text="7"
+            app:backgroundTint="@color/green" />
+        <Button
+            android:id="@+id/btn_8"
+            style="@style/Calculator.Button.Number"
+            android:text="8"
+            app:backgroundTint="@color/green" />
+        <Button
+            android:id="@+id/btn_9"
+            style="@style/Calculator.Button.Number"
+            android:text="9"
+            app:backgroundTint="@color/green" />
+        <Button
+            android:id="@+id/btn_multiply"
+            style="@style/Calculator.Button.Operator"
+            android:text="×"
+            app:backgroundTint="@color/green" />
+
+        <Button
+            android:id="@+id/btn_4"
+            style="@style/Calculator.Button.Number"
+            android:text="4"
+            app:backgroundTint="@color/green" />
+        <Button
+            android:id="@+id/btn_5"
+            style="@style/Calculator.Button.Number"
+            android:text="5"
+            app:backgroundTint="@color/green" />
+        <Button
+            android:id="@+id/btn_6"
+            style="@style/Calculator.Button.Number"
+            android:text="6"
+            app:backgroundTint="@color/green" />
+        <Button
+            android:id="@+id/btn_subtract"
+            style="@style/Calculator.Button.Operator"
+            android:text="−"
+            app:backgroundTint="@color/green" />
+
+        <Button
+            android:id="@+id/btn_1"
+            style="@style/Calculator.Button.Number"
+            android:text="1"
+            app:backgroundTint="@color/green" />
+        <Button
+            android:id="@+id/btn_2"
+            style="@style/Calculator.Button.Number"
+            android:text="2"
+            app:backgroundTint="@color/green" />
+        <Button
+            android:id="@+id/btn_3"
+            style="@style/Calculator.Button.Number"
+            android:text="3"
+            app:backgroundTint="@color/green" />
+        <Button
+            android:id="@+id/btn_add"
+            style="@style/Calculator.Button.Operator"
+            android:text="+"
+            app:backgroundTint="@color/green" />
+
+        <Button
+            android:id="@+id/btn_0"
+            style="@style/Calculator.Button.Number"
+            android:layout_columnSpan="2"
+            android:text="0"
+            app:backgroundTint="@color/green" />
+        <Button
+            android:id="@+id/btn_dot"
+            style="@style/Calculator.Button.Number"
+            android:text="."
+            app:backgroundTint="@color/green" />
+        <Button
+            android:id="@+id/btn_equals"
+            style="@style/Calculator.Button.Operator"
+            android:text="="
+            app:backgroundTint="@color/green" />
+    </GridLayout>
+
+    <ImageButton
+        android:id="@+id/btn_backspace"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_margin="8dp"
+        android:background="@drawable/background_calculator_button_round"
+        android:contentDescription="Backspace"
+        android:src="@drawable/ic_backspace"
+        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/calculator_display"
+        app:tint="@color/box_stroke_color_selector" />
+
+    <Button
+        android:id="@+id/done_button"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:backgroundTint="@color/box_stroke_color_selector"
+        android:text="Done"
+        android:textColor="@color/gray"
+        android:textSize="16sp"
+        app:cornerRadius="25dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
