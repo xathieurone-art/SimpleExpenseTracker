@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/black"
+    tools:context=".ui.theme.DashboardFragment">
+
+    <TextView
+        android:id="@+id/tvAppName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:text="Expense Tracker"
+        android:textColor="@color/green"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="@+id/notificationLayout"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/notificationLayout" />
+
+    <FrameLayout
+        android:id="@+id/notificationLayout"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        android:layout_marginTop="24dp"
+        android:layout_marginEnd="16dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:clickable="true"
+        android:focusable="true"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:id="@+id/notification_icon"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_gravity="center"
+            android:contentDescription="Notifications"
+            android:src="@drawable/ic_notification"
+            app:tint="@color/white" />
+
+        <ImageView
+            android:id="@+id/notification_dot"
+            android:layout_width="14dp"
+            android:layout_height="14dp"
+            android:layout_gravity="top|end"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            android:contentDescription="New notification indicator"
+            android:src="@drawable/ic_notification_dot"
+            android:visibility="gone"
+            tools:visibility="visible" />
+    </FrameLayout>
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/dashboard_card"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        app:cardBackgroundColor="#2C2C2E"
+        app:cardCornerRadius="20dp"
+        app:cardElevation="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/notificationLayout">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="20dp">
+
+            <TextView
+                android:id="@+id/spent_this_month_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Spent This Month"
+                android:textColor="#AEAEB2"
+                android:textSize="16sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/totalExpenseText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:textColor="@color/white"
+                android:textSize="28sp"
+                android:textStyle="bold"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/spent_this_month_label"
+                tools:text="₱1,234.56" />
+
+            <TextView
+                android:id="@+id/remainingBudgetText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:textColor="#8E8E93"
+                android:textSize="14sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/totalExpenseText"
+                tools:text="Remaining: ₱8,765.44" />
+
+            <View
+                android:id="@+id/divider"
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_marginTop="20dp"
+                android:background="#3A3A3C"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/remainingBudgetText" />
+
+
+            <TextView
+                android:id="@+id/daily_label"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:gravity="center"
+                android:text="Today"
+                android:textColor="#AEAEB2"
+                android:textSize="14sp"
+                app:layout_constraintEnd_toStartOf="@+id/weekly_label"
+                app:layout_constraintHorizontal_chainStyle="spread_inside"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/divider" />
+
+            <TextView
+                android:id="@+id/dailySpentText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/white"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                app:layout_constraintEnd_toEndOf="@id/daily_label"
+                app:layout_constraintStart_toStartOf="@id/daily_label"
+                app:layout_constraintTop_toBottomOf="@id/daily_label"
+                tools:text="₱45.89" />
+
+            <TextView
+                android:id="@+id/dailyRemainingText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#8E8E93"
+                android:textSize="12sp"
+                app:layout_constraintEnd_toEndOf="@id/daily_label"
+                app:layout_constraintStart_toStartOf="@id/daily_label"
+                app:layout_constraintTop_toBottomOf="@id/dailySpentText"
+                tools:text="Rem: ₱54.11" />
+
+
+            <TextView
+                android:id="@+id/weekly_label"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="This Week"
+                android:textColor="#AEAEB2"
+                android:textSize="14sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/daily_label"
+                app:layout_constraintTop_toTopOf="@id/daily_label" />
+
+            <TextView
+                android:id="@+id/weeklySpentText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/white"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                app:layout_constraintEnd_toEndOf="@id/weekly_label"
+                app:layout_constraintStart_toStartOf="@id/weekly_label"
+                app:layout_constraintTop_toBottomOf="@id/weekly_label"
+                tools:text="₱345.67" />
+
+            <TextView
+                android:id="@+id/weeklyRemainingText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#8E8E93"
+                android:textSize="12sp"
+                app:layout_constraintEnd_toEndOf="@id/weekly_label"
+                app:layout_constraintStart_toStartOf="@id/weekly_label"
+                app:layout_constraintTop_toBottomOf="@id/weeklySpentText"
+                tools:text="Rem: ₱354.33" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.cardview.widget.CardView>
+
+    <TextView
+        android:id="@+id/recentExpensesLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="24dp"
+        android:text="Recent Expenses"
+        android:textColor="@color/white"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/dashboard_card" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recentExpensesRecycler"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/recentExpensesLabel"
+        tools:listitem="@layout/item_expense" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
