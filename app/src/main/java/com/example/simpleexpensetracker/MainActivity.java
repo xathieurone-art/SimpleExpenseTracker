@@ -25,29 +25,23 @@ import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends AppCompatActivity {
 
-    BottomNavigationView bottomNavigationView;
+    private BottomNavigationView bottomNavigationView;
     private static final String PREFS_NAME = "AppPrefs";
     private static final String FIRST_RUN_KEY = "isFirstRun";
+    private static final String PERIODIC_WORK_TAG = "PeriodicReminderWork";
 
     private final ActivityResultLauncher<String> requestPermissionLauncher =
             registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
+                SharedPreferences.Editor editor = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).edit();
                 if (isGranted) {
                     Toast.makeText(this, "Notifications enabled!", Toast.LENGTH_SHORT).show();
-                    // The user just granted permission on the first run.
-                    // This is the ONLY place we should show the welcome notification in this path.
                     NotificationUtils.showWelcomeNotification(this);
-                    // Mark first run as complete.
-                    getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).edit()
-                            .putBoolean(FIRST_RUN_KEY, false).apply();
-
                     schedulePeriodicNotificationWorker();
                 } else {
+                    Toast.makeText(this, "Notifications will not be shown.", Toast.LENGTH_LONG).show();
                     SettingsManager.setNotificationsEnabled(this, false);
-                    Toast.makeText(this, "Notifications will not be shown as permission was denied.", Toast.LENGTH_LONG).show();
-                    // Mark first run as complete even if they deny, so we don't ask again.
-                    getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).edit()
-                            .putBoolean(FIRST_RUN_KEY, false).apply();
                 }
+                editor.putBoolean(FIRST_RUN_KEY, false).apply();
             });
 
     @Override
@@ -85,7 +79,39 @@ public class MainActivity extends AppCompatActivity {
             return true;
         });
 
-        handleFirstRunAndPermissions();
+        initializeAppLogic();
+    }
+
+    private void initializeAppLogic() {
+        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        boolean isFirstRun = prefs.getBoolean(FIRST_RUN_KEY, true);
+
+        if (isFirstRun) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS);
+            } else {
+                NotificationUtils.showWelcomeNotification(this);
+                schedulePeriodicNotificationWorker();
+                prefs.edit().putBoolean(FIRST_RUN_KEY, false).apply();
+            }
+        }
+    }
+
+    public void schedulePeriodicNotificationWorker() {
+        PeriodicWorkRequest periodicRequest =
+                new PeriodicWorkRequest.Builder(NotificationWorker.class, 6, TimeUnit.HOURS)
+                        .setInitialDelay(6, TimeUnit.HOURS)
+                        .build();
+
+        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
+                PERIODIC_WORK_TAG,
+                ExistingPeriodicWorkPolicy.REPLACE,
+                periodicRequest
+        );
+    }
+
+    public void cancelPeriodicNotificationWorker() {
+        WorkManager.getInstance(this).cancelUniqueWork(PERIODIC_WORK_TAG);
     }
 
     private void loadFragment(Fragment fragment) {
@@ -100,65 +126,6 @@ public class MainActivity extends AppCompatActivity {
         } else {
             bottomNavigationView.removeBadge(R.id.nav_settings);
         }
-    }
-
-    private void handleFirstRunAndPermissions() {
-        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-        boolean isFirstRun = prefs.getBoolean(FIRST_RUN_KEY, true);
-
-
-        if (isFirstRun) {
-            SettingsManager.setNotificationsEnabled(this, true);
-            askForNotificationPermission();
-        } else {
-            if (SettingsManager.areNotificationsEnabled(this)) {
-                askForNotificationPermission();
-            }
-        }
-    }
-
-    private void askForNotificationPermission() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) ==
-                    PackageManager.PERMISSION_GRANTED) {
-
-                handleGrantedPermission();
-            } else {
-
-                requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS);
-            }
-        } else {
-
-            handleGrantedPermission();
-        }
-    }
-
-    private void handleGrantedPermission() {
-        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-        boolean isFirstRun = prefs.getBoolean(FIRST_RUN_KEY, true);
-
-        if (isFirstRun) {
-            NotificationUtils.showWelcomeNotification(this);
-            prefs.edit().putBoolean(FIRST_RUN_KEY, false).apply();
-        }
-
-        schedulePeriodicNotificationWorker();
-    }
-
-    public void schedulePeriodicNotificationWorker() {
-        PeriodicWorkRequest periodicNotificationRequest =
-                new PeriodicWorkRequest.Builder(NotificationWorker.class, 6, TimeUnit.HOURS)
-                        .build();
-
-        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
-                "PeriodicReminderWork",
-                ExistingPeriodicWorkPolicy.KEEP,
-                periodicNotificationRequest
-        );
-    }
-
-    public void cancelPeriodicNotificationWorker() {
-        WorkManager.getInstance(this).cancelUniqueWork("PeriodicReminderWork");
     }
 
     public void updateNotificationBadge() {
