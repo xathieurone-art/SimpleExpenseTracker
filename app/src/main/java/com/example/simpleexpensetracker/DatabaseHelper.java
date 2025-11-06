@@ -10,11 +10,12 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
+import java.util.TimeZone;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "ExpenseTracker.db";
-    private static final int DATABASE_VERSION = 3;
+    private static final int DATABASE_VERSION = 5;
 
     public static final String TABLE_EXPENSES = "expenses";
     public static final String TABLE_BUDGET = "budget";
@@ -35,9 +36,19 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String COL_NOTIF_MESSAGE = "message";
     public static final String COL_NOTIF_TIMESTAMP = "timestamp";
     public static final String COL_NOTIF_IS_READ = "is_read";
+    public static final String COL_NOTIF_TYPE = "notification_type";
+
+    private final Context context;
 
     public DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
+        this.context = context.getApplicationContext();
+    }
+
+    private SimpleDateFormat getUtcDateFormat() {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+        return sdf;
     }
 
     @Override
@@ -58,8 +69,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         String CREATE_TABLE_NOTIFICATIONS = "CREATE TABLE " + TABLE_NOTIFICATIONS + "("
                 + COL_NOTIF_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
                 + COL_NOTIF_MESSAGE + " TEXT,"
-                + COL_NOTIF_TIMESTAMP + " DATETIME DEFAULT CURRENT_TIMESTAMP,"
-                + COL_NOTIF_IS_READ + " INTEGER DEFAULT 0" + ")";
+                + COL_NOTIF_TIMESTAMP + " TEXT,"
+                + COL_NOTIF_IS_READ + " INTEGER DEFAULT 0,"
+                + COL_NOTIF_TYPE + " TEXT" + ")";
 
         db.execSQL(CREATE_EXPENSES_TABLE);
         db.execSQL(CREATE_BUDGET_TABLE);
@@ -84,6 +96,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 Log.e("DatabaseHelper", "Error upgrading from v1 to v2. Recreating DB.", e);
                 db.execSQL("DROP TABLE IF EXISTS " + TABLE_BUDGET);
                 db.execSQL("DROP TABLE IF EXISTS " + TABLE_EXPENSES);
+                db.execSQL("DROP TABLE IF EXISTS " + TABLE_NOTIFICATIONS);
                 onCreate(db);
                 return;
             }
@@ -96,18 +109,110 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     + COL_NOTIF_IS_READ + " INTEGER DEFAULT 0" + ")";
             db.execSQL(CREATE_TABLE_NOTIFICATIONS);
         }
+        if (oldVersion < 4) {
+            db.execSQL("ALTER TABLE " + TABLE_NOTIFICATIONS + " ADD COLUMN " + COL_NOTIF_TYPE + " TEXT");
+        }
+        if (oldVersion < 5) {
+            db.execSQL("DROP TABLE IF EXISTS " + TABLE_NOTIFICATIONS);
+            String CREATE_TABLE_NOTIFICATIONS_V5 = "CREATE TABLE " + TABLE_NOTIFICATIONS + "("
+                    + COL_NOTIF_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
+                    + COL_NOTIF_MESSAGE + " TEXT,"
+                    + COL_NOTIF_TIMESTAMP + " TEXT,"
+                    + COL_NOTIF_IS_READ + " INTEGER DEFAULT 0,"
+                    + COL_NOTIF_TYPE + " TEXT" + ")";
+            db.execSQL(CREATE_TABLE_NOTIFICATIONS_V5);
+        }
     }
 
     public boolean addExpense(String category, double amount, String note, String date) {
         SQLiteDatabase db = this.getWritableDatabase();
-        ContentValues values = new ContentValues();
-        values.put(COL_EXPENSE_CATEGORY, category);
-        values.put(COL_EXPENSE_AMOUNT, amount);
-        values.put(COL_EXPENSE_NOTE, note);
-        values.put(COL_EXPENSE_DATE, date);
-        long result = db.insert(TABLE_EXPENSES, null, values);
-        db.close();
+        long result = -1;
+        try {
+            db.beginTransaction();
+
+            ContentValues values = new ContentValues();
+            values.put(COL_EXPENSE_CATEGORY, category);
+            values.put(COL_EXPENSE_AMOUNT, amount);
+            values.put(COL_EXPENSE_NOTE, note);
+            values.put(COL_EXPENSE_DATE, date);
+            result = db.insert(TABLE_EXPENSES, null, values);
+
+            if (result != -1) {
+                checkBudgetLimitsAndNotify(db);
+            }
+            db.setTransactionSuccessful();
+        } catch (Exception e) {
+            Log.e("DatabaseHelper", "Error adding expense or checking limits", e);
+        } finally {
+            db.endTransaction();
+            db.close();
+        }
         return result != -1;
+    }
+
+    private void checkBudgetLimitsAndNotify(SQLiteDatabase db) {
+        double monthlyLimit = getMonthlyBudget();
+        double totalMonth = getTotalExpensesForCurrentMonth();
+        if (monthlyLimit > 0 && totalMonth > monthlyLimit) {
+            String period = new SimpleDateFormat("yyyy-MM", Locale.getDefault()).format(new Date());
+            String type = "monthly_" + period;
+            if (!hasNotificationForType(db, type)) {
+                String message = String.format(Locale.getDefault(), "You have exceeded your monthly budget of ₱%,.2f!", monthlyLimit);
+                addNotification(db, message, type);
+                return;
+            }
+        }
+
+        double weeklyLimit = getWeeklyLimit();
+        double totalWeek = getTotalExpensesForCurrentWeek();
+        if (weeklyLimit > 0 && totalWeek > weeklyLimit) {
+            Calendar cal = Calendar.getInstance();
+            String period = cal.get(Calendar.YEAR) + "-" + cal.get(Calendar.WEEK_OF_YEAR);
+            String type = "weekly_" + period;
+            if (!hasNotificationForType(db, type)) {
+                String message = String.format(Locale.getDefault(), "You have exceeded your weekly budget of ₱%,.2f!", weeklyLimit);
+                addNotification(db, message, type);
+                return;
+            }
+        }
+
+        double dailyLimit = getDailyLimit();
+        double totalDay = getTotalExpensesForToday();
+        if (dailyLimit > 0 && totalDay > dailyLimit) {
+            String period = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
+            String type = "daily_" + period;
+            if (!hasNotificationForType(db, type)) {
+                String message = String.format(Locale.getDefault(), "You have exceeded your daily budget of ₱%,.2f!", dailyLimit);
+                addNotification(db, message, type);
+            }
+        }
+    }
+
+    private boolean hasNotificationForType(SQLiteDatabase db, String type) {
+        try (Cursor cursor = db.query(TABLE_NOTIFICATIONS, new String[]{COL_NOTIF_ID}, COL_NOTIF_TYPE + " = ?", new String[]{type}, null, null, null, "1")) {
+            return cursor != null && cursor.getCount() > 0;
+        }
+    }
+
+    public void addNotification(String message, String type) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        try {
+            addNotification(db, message, type);
+        } finally {
+            if (db != null && db.isOpen()) {
+                db.close();
+            }
+        }
+    }
+
+    private void addNotification(SQLiteDatabase db, String message, String type) {
+        ContentValues values = new ContentValues();
+        values.put(COL_NOTIF_MESSAGE, message);
+        values.put(COL_NOTIF_TYPE, type);
+        values.put(COL_NOTIF_TIMESTAMP, getUtcDateFormat().format(new Date()));
+        db.insert(TABLE_NOTIFICATIONS, null, values);
+
+        NotificationUtils.showBudgetWarningNotification(context, message);
     }
 
     public Cursor getAllExpenses() {
@@ -220,14 +325,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             }
         }
         return 0.0;
-    }
-
-    public void addNotification(String message) {
-        SQLiteDatabase db = this.getWritableDatabase();
-        ContentValues values = new ContentValues();
-        values.put(COL_NOTIF_MESSAGE, message);
-        db.insert(TABLE_NOTIFICATIONS, null, values);
-        db.close();
     }
 
     public Cursor getAllNotifications() {
