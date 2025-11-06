@@ -33,10 +33,20 @@ public class MainActivity extends AppCompatActivity {
             registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
                 if (isGranted) {
                     Toast.makeText(this, "Notifications enabled!", Toast.LENGTH_SHORT).show();
+                    // The user just granted permission on the first run.
+                    // This is the ONLY place we should show the welcome notification in this path.
+                    NotificationUtils.showWelcomeNotification(this);
+                    // Mark first run as complete.
+                    getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).edit()
+                            .putBoolean(FIRST_RUN_KEY, false).apply();
+
                     schedulePeriodicNotificationWorker();
                 } else {
                     SettingsManager.setNotificationsEnabled(this, false);
                     Toast.makeText(this, "Notifications will not be shown as permission was denied.", Toast.LENGTH_LONG).show();
+                    // Mark first run as complete even if they deny, so we don't ask again.
+                    getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).edit()
+                            .putBoolean(FIRST_RUN_KEY, false).apply();
                 }
             });
 
@@ -96,10 +106,10 @@ public class MainActivity extends AppCompatActivity {
         SharedPreferences prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
         boolean isFirstRun = prefs.getBoolean(FIRST_RUN_KEY, true);
 
+
         if (isFirstRun) {
             SettingsManager.setNotificationsEnabled(this, true);
             askForNotificationPermission();
-            prefs.edit().putBoolean(FIRST_RUN_KEY, false).apply();
         } else {
             if (SettingsManager.areNotificationsEnabled(this)) {
                 askForNotificationPermission();
@@ -111,13 +121,28 @@ public class MainActivity extends AppCompatActivity {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) ==
                     PackageManager.PERMISSION_GRANTED) {
-                schedulePeriodicNotificationWorker();
+
+                handleGrantedPermission();
             } else {
+
                 requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS);
             }
         } else {
-            schedulePeriodicNotificationWorker();
+
+            handleGrantedPermission();
         }
+    }
+
+    private void handleGrantedPermission() {
+        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        boolean isFirstRun = prefs.getBoolean(FIRST_RUN_KEY, true);
+
+        if (isFirstRun) {
+            NotificationUtils.showWelcomeNotification(this);
+            prefs.edit().putBoolean(FIRST_RUN_KEY, false).apply();
+        }
+
+        schedulePeriodicNotificationWorker();
     }
 
     public void schedulePeriodicNotificationWorker() {

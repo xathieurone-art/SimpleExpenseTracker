@@ -28,6 +28,7 @@ import java.util.Locale;
 public class DashboardFragment extends Fragment {
 
     private TextView totalExpenseText, remainingBudgetText, dailySpentText, dailyRemainingText, weeklySpentText, weeklyRemainingText;
+    private TextView monthlyBudgetWarning, weeklyBudgetWarning, dailyBudgetWarning;
     private RecyclerView recyclerView;
     private ExpenseAdapter adapter;
     private ArrayList<Expense> expenseList;
@@ -50,6 +51,9 @@ public class DashboardFragment extends Fragment {
         recyclerView = view.findViewById(R.id.recentExpensesRecycler);
         notificationLayout = view.findViewById(R.id.notificationLayout);
         notificationDot = view.findViewById(R.id.notification_dot);
+        monthlyBudgetWarning = view.findViewById(R.id.monthlyBudgetWarning);
+        weeklyBudgetWarning = view.findViewById(R.id.weeklyBudgetWarning);
+        dailyBudgetWarning = view.findViewById(R.id.dailyBudgetWarning);
 
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         expenseList = new ArrayList<>();
@@ -104,25 +108,31 @@ public class DashboardFragment extends Fragment {
         if (monthlyLimit > 0 && spentMonth > monthlyLimit) {
             totalExpenseText.setTextColor(dangerColor);
             remainingBudgetText.setTextColor(dangerColor);
+            monthlyBudgetWarning.setVisibility(View.VISIBLE);
         } else {
             totalExpenseText.setTextColor(defaultColor);
             remainingBudgetText.setTextColor(secondaryColor);
-        }
-
-        if (dailyLimit > 0 && spentToday > dailyLimit) {
-            dailySpentText.setTextColor(dangerColor);
-            dailyRemainingText.setTextColor(dangerColor);
-        } else {
-            dailySpentText.setTextColor(defaultColor);
-            dailyRemainingText.setTextColor(secondaryColor);
+            monthlyBudgetWarning.setVisibility(View.GONE);
         }
 
         if (weeklyLimit > 0 && spentWeek > weeklyLimit) {
             weeklySpentText.setTextColor(dangerColor);
             weeklyRemainingText.setTextColor(dangerColor);
+            weeklyBudgetWarning.setVisibility(View.VISIBLE);
         } else {
             weeklySpentText.setTextColor(defaultColor);
             weeklyRemainingText.setTextColor(secondaryColor);
+            weeklyBudgetWarning.setVisibility(View.GONE);
+        }
+
+        if (dailyLimit > 0 && spentToday > dailyLimit) {
+            dailySpentText.setTextColor(dangerColor);
+            dailyRemainingText.setTextColor(dangerColor);
+            dailyBudgetWarning.setVisibility(View.VISIBLE);
+        } else {
+            dailySpentText.setTextColor(defaultColor);
+            dailyRemainingText.setTextColor(secondaryColor);
+            dailyBudgetWarning.setVisibility(View.GONE);
         }
 
         expenseList.clear();
@@ -151,25 +161,8 @@ public class DashboardFragment extends Fragment {
     }
 
     public void checkForNotifications() {
-        if (getContext() == null || db == null) {
+        if (db == null) {
             return;
-        }
-
-        double monthlyBudget = db.getMonthlyBudget();
-        double totalExpensesForMonth = db.getTotalExpensesForCurrentMonth();
-
-        if (monthlyBudget > 0 && totalExpensesForMonth > monthlyBudget) {
-            SharedPreferences prefs = requireActivity().getSharedPreferences("NotificationPrefs", Context.MODE_PRIVATE);
-            String lastNotifiedMonth = prefs.getString("last_budget_notif_month", "");
-            String currentMonth = new SimpleDateFormat("yyyy-MM", Locale.getDefault()).format(new Date());
-
-            if (!lastNotifiedMonth.equals(currentMonth)) {
-                String message = String.format(Locale.getDefault(),
-                        "You have exceeded your monthly budget of ₱%,.2f!", monthlyBudget);
-                db.addNotification(message);
-
-                prefs.edit().putString("last_budget_notif_month", currentMonth).apply();
-            }
         }
 
         if (db.getUnreadNotificationCount() > 0) {

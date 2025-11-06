@@ -10,7 +10,6 @@ import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
-
 import java.util.Random;
 
 public class NotificationWorker extends Worker {
@@ -37,8 +36,7 @@ public class NotificationWorker extends Worker {
         String randomMessage = messages[random.nextInt(messages.length)];
 
         DatabaseHelper db = new DatabaseHelper(context);
-        db.addNotification(randomMessage);
-        db.close();
+        db.addNotification(randomMessage, "reminder");
 
         sendSystemNotification(context, "Expense Tracker Reminder", randomMessage);
 

@@ -144,48 +144,49 @@ public class AddExpenseFragment extends Fragment {
             return;
         }
 
-        double dailyLimit = db.getDailyLimit();
+        double monthlyLimit = db.getMonthlyBudget();
         double weeklyLimit = db.getWeeklyLimit();
-        double monthlyBudget = db.getMonthlyBudget();
-        double totalSpentToday = db.getTotalExpensesForToday();
-        double totalSpentThisWeek = db.getTotalExpensesForCurrentWeek();
-        double totalSpentThisMonth = db.getTotalExpensesForCurrentMonth();
+        double dailyLimit = db.getDailyLimit();
 
-        if (dailyLimit > 0 && (totalSpentToday + amount) > dailyLimit) {
-            showBudgetWarning("daily", finalCategory, amount, note, date);
-        } else if (weeklyLimit > 0 && (totalSpentThisWeek + amount) > weeklyLimit) {
-            showBudgetWarning("weekly", finalCategory, amount, note, date);
-        } else if (monthlyBudget > 0 && (totalSpentThisMonth + amount) > monthlyBudget) {
-            showBudgetWarning("monthly", finalCategory, amount, note, date);
+        double spentMonth = db.getTotalExpensesForCurrentMonth();
+        double spentWeek = db.getTotalExpensesForCurrentWeek();
+        double spentToday = db.getTotalExpensesForToday();
+
+        String warningMessage = null;
+
+        if (monthlyLimit > 0 && (spentMonth + amount) > monthlyLimit) {
+            warningMessage = String.format(Locale.getDefault(),
+                    "Adding this expense will exceed your monthly budget of ₱%,.2f. Do you want to continue?", monthlyLimit);
+        } else if (weeklyLimit > 0 && (spentWeek + amount) > weeklyLimit) {
+            warningMessage = String.format(Locale.getDefault(),
+                    "Adding this expense will exceed your weekly budget of ₱%,.2f. Do you want to continue?", weeklyLimit);
+        } else if (dailyLimit > 0 && (spentToday + amount) > dailyLimit) {
+            warningMessage = String.format(Locale.getDefault(),
+                    "Adding this expense will exceed your daily budget of ₱%,.2f. Do you want to continue?", dailyLimit);
+        }
+
+        if (warningMessage != null) {
+            new AlertDialog.Builder(requireContext())
+                    .setTitle("Budget Warning")
+                    .setMessage(warningMessage)
+                    .setPositiveButton("Continue", (dialog, which) -> performSave(finalCategory, amount, note, date))
+                    .setNegativeButton("Cancel", null)
+                    .setIcon(R.drawable.ic_warning_red)
+                    .show();
         } else {
             performSave(finalCategory, amount, note, date);
         }
     }
 
-    private void showBudgetWarning(String period, String category, double amount, String note, String date) {
-        new AlertDialog.Builder(getContext())
-                .setTitle("Budget Warning")
-                .setMessage("Saving this expense will exceed your " + period + " budget. Are you sure you want to continue?")
-                .setPositiveButton("Yes, Save Anyway", (dialog, which) -> performSave(category, amount, note, date))
-                .setNegativeButton("Cancel", null)
-                .setIcon(android.R.drawable.ic_dialog_alert)
-                .show();
-    }
-
     private void performSave(String category, double amount, String note, String date) {
-        boolean inserted = db.addExpense(category, amount, note, date);
-        if (inserted) {
-            Toast.makeText(getContext(), "Expense saved successfully!", Toast.LENGTH_SHORT).show();
-
-            etCategory.setText("");
-            etAmount.setText("");
-            etNote.setText("");
-            etDate.setText("");
-            otherCategoryEditText.setText("");
-            otherCategoryLayout.setVisibility(View.GONE);
-
+        boolean isInserted = db.addExpense(category, amount, note, date);
+        if (isInserted) {
+            Toast.makeText(getContext(), "Expense added successfully", Toast.LENGTH_SHORT).show();
+            if (getParentFragmentManager() != null) {
+                getParentFragmentManager().popBackStack();
+            }
         } else {
-            Toast.makeText(getContext(), "Error saving expense", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), "Failed to add expense", Toast.LENGTH_SHORT).show();
         }
     }
 }
